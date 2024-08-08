@@ -1,0 +1,31 @@
+# Java byte-compiled class files
+*.class
+
+# Java compiler generated files
+*.java~*, *.swp, *.swo, .DS_Store
+
+# Build directories
+/target/, /build/, /dist/
+
+# Dependencies
+/nbproject/private/
+.nb-javac-cache/
+
+# Logs
+*.log
+
+# IDE temporary files
+.idea/
+.vscode/
+*.tmp
+*.tmp.swp
+*.tmp.swo
+*.tmp.bak
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Docker
+Dockerfile
+.dockerignore
