@@ -1,204 +1,385 @@
-# 📘 register-app-java — Project Documentation
 
-## Overview
+# 📘 register-app-java — Detailed Project Documentation
 
-**register-app-java** is a Maven multi-module Java web application that implements a user registration system.
-The project is designed primarily as a **learning resource** demonstrating Java EE fundamentals, DevOps practices, and containerized deployment.
+## 1. Introduction
 
-It covers:
+**register-app-java** is a **Maven multi-module Java web application** that demonstrates how a traditional Java EE application is structured, built, tested, containerized, and deployed.
 
-* Project purpose and architecture
-* Technology stack
-* Build and deployment workflow
-* Code quality tooling
+The project is intentionally built using **classic Java EE technologies and older dependency versions** to help learners understand the underlying mechanics of enterprise Java before moving to modern frameworks like Spring Boot.
 
----
+It serves as a **reference implementation** for:
 
-## Repository Purpose
-
-The application provides a simple user registration and authentication workflow.
-It is structured as an educational project and showcases:
-
-* Java EE web development patterns
-* Maven multi-module project organization
+* Multi-module Maven builds
+* Layered application design
+* WAR packaging and servlet containers
 * Docker-based deployment
-* Code quality and reporting tools
-
-The project branding references **DevOps learning content**, highlighting its role as a teaching example rather than a production system.
+* Static analysis and reporting
 
 ---
 
-## Multi-Module Architecture
+## 2. Objectives of the Project
 
-The repository is organized as a **Maven parent project** with two modules:
+The main goals of this repository are:
 
-| Module   | Packaging | Responsibility             |
-| -------- | --------- | -------------------------- |
-| `server` | JAR       | Business logic             |
-| `webapp` | WAR       | Web interface & deployment |
+1. Demonstrate **clean separation of concerns**
+2. Show how Maven manages **multi-module dependency graphs**
+3. Provide a simple **user registration workflow**
+4. Illustrate **containerized deployment**
+5. Integrate **code quality tooling**
+6. Serve as a base template for experimentation
 
-**Parent Coordinates**
+---
+
+## 3. High-Level Architecture
+
+The system follows a **layered architecture**:
+
+```
+Presentation Layer (JSP / Servlets)
+        ↓
+Application Layer (Controllers / Services)
+        ↓
+Domain / Business Logic (Core Module)
+```
+
+### Architectural Characteristics
+
+* Monolithic deployment
+* Clear module boundaries
+* Container-managed runtime
+* No external database (or optional in-memory usage depending on implementation)
+
+---
+
+## 4. Maven Multi-Module Design
+
+The parent project acts as an **aggregator and dependency manager**.
+
+## Parent Project
 
 ```
 com.example.maven-project:maven-project:1.0-SNAPSHOT
 ```
 
-### Artifact Outputs
+Responsibilities:
 
-* **server.jar** → core logic
-* **webapp.war** → deployable web app
-
----
-
-## Technology Stack
-
-### Platform
-
-* **Java Target:** 1.7
-* **Build Tool:** Maven 3.0.3+
-
-### Web Technologies
-
-* Servlet API 2.5 (provided by container)
-* JSP API 2.2
-
-### Testing
-
-* JUnit 4.10
-* Hamcrest 1.2.1
-* Mockito 1.8.5
-
-### Runtime / Container
-
-* Tomcat (Docker image)
-
-> The Servlet and JSP dependencies use `provided` scope because Tomcat supplies them at runtime.
+* Central dependency management
+* Plugin configuration
+* Reporting setup
+* Module orchestration
 
 ---
 
-##  Module Relationships & Build Artifacts
+## 5. Modules in Detail
 
-During the Maven lifecycle:
+## 5.1 Server Module (`server`)
 
-1. Source code is compiled
-2. Tests are executed
-3. Packages are generated
+**Packaging:** `jar`
 
-Resulting artifacts:
+### Responsibilities
 
-* `server/target/server.jar`
-* `webapp/target/webapp.war`
+* Business rules implementation
+* Domain models (User, Registration logic)
+* Validation logic
+* Utility classes
 
-The **Dockerfile** copies the WAR into Tomcat’s `webapps` directory for deployment.
+### Typical Package Structure
+
+```
+com.example.server
+├─ model
+├─ service
+├─ repository (optional)
+└─ util
+```
+
+### Output
+
+```
+server/target/server.jar
+```
+
+This artifact is used as a dependency by the web module.
 
 ---
 
-## Code Quality & Reporting
+## 5.2 Web Application Module (`webapp`)
 
-The parent POM configures multiple reporting plugins via the Maven Site plugin.
+**Packaging:** `war`
 
-| Plugin          | Purpose                |
-| --------------- | ---------------------- |
-| Checkstyle      | Code style validation  |
-| JXR             | Source cross-reference |
-| Javadoc         | API documentation      |
-| PMD             | Static analysis        |
-| Surefire Report | Test reports           |
-| FindBugs        | Bug detection          |
-| Taglist         | TODO/FIXME tracking    |
+### Responsibilities
 
-Generated site output:
+* Servlets (controllers)
+* JSP views
+* Web configuration (`web.xml`)
+* Session handling
+* Request routing
+
+### Typical Package Structure
 
 ```
-file:///tmp/maven-project-site
+com.example.web
+├─ servlet
+├─ filter (optional)
+└─ listener (optional)
+```
+
+### Web Resources
+
+```
+webapp/src/main/webapp
+├─ WEB-INF
+│  └─ web.xml
+├─ jsp
+└─ static
+```
+
+### Output
+
+```
+webapp/target/webapp.war
 ```
 
 ---
 
-## 📁 Project Structure
+## 6. Dependency Management Strategy
 
-```
-root
-├─ pom.xml
-├─ Dockerfile
-├─ server/
-│  ├─ pom.xml
-│  └─ src/
-└─ webapp/
-   ├─ pom.xml
-   └─ src/
-```
+The parent POM defines **versions and scopes** to ensure consistency.
 
-Each module follows standard Maven conventions.
+### Key Principles
 
----
+* `provided` scope for container APIs
+* Centralized version control
+* Reusable dependency definitions
 
-## Build Configuration Properties
+### Example
 
-Defined in the parent POM:
-
-```
-project.build.sourceEncoding = UTF-8
-project.reporting.outputEncoding = UTF-8
-```
-
-These ensure consistent encoding across build and reporting phases.
+* Servlet API → Provided by Tomcat
+* Testing libraries → Test scope only
+* Server module → Compile dependency for webapp
 
 ---
 
-## Distribution & SCM
+## 7. Build Lifecycle Explained
 
-* **Site Deployment:** `file:///tmp/maven-project-site`
-* **SCM:** Git repository reference (educational example)
+The project uses the **standard Maven lifecycle**.
+
+### Phase Breakdown
+
+1. **validate** — project structure validation
+2. **compile** — source compilation
+3. **test** — unit test execution
+4. **package** — artifact creation
+5. **verify** — integration checks
+6. **install** — local repository install
+
+### Command
+
+```
+mvn clean install
+```
+
+This builds all modules in dependency order.
 
 ---
 
-##  Deployment Flow
+## 8. Testing Strategy
 
-### Build Lifecycle
+The project uses **unit testing** for core logic.
 
-```
-mvn clean
-mvn compile
-mvn test
-mvn package
-```
+### Frameworks
 
-### Containerization
+* JUnit → Test runner
+* Hamcrest → Assertions
+* Mockito → Mocking dependencies
+
+### Test Scope
+
+* Service layer validation
+* Business rule verification
+* Edge case handling
+
+---
+
+## 9. Code Quality & Reporting
+
+The Maven Site lifecycle generates a **project dashboard**.
+
+## Static Analysis Tools
+
+### Checkstyle
+
+Ensures consistent coding standards.
+
+### PMD
+
+Detects bad practices and potential issues.
+
+### FindBugs
+
+Identifies possible runtime bugs.
+
+### JXR
+
+Provides browsable source code.
+
+### Surefire Report
+
+Displays test results and coverage summary.
+
+### Javadoc
+
+Generates API documentation.
+
+### Taglist
+
+Tracks TODO and FIXME comments.
+
+---
+
+## 10. Dockerized Deployment
+
+The application is packaged into a container for portability.
+
+## Docker Workflow
+
+### Build Image
 
 ```
 docker build -t register-app .
+```
+
+### Run Container
+
+```
 docker run -p 8080:8080 register-app
 ```
 
-### Result
+### What Happens Internally
 
-Application available at:
-
-[http://localhost:8080](http://localhost:8080)
-
----
-
-##  Educational Context
-
-This project is intended as a **hands-on learning resource** for:
-
-* Maven multi-module architecture
-* Java EE fundamentals
-* Docker containerization
-* CI/CD concepts
-* Code quality practices
-
-The use of stable, older versions emphasizes understanding core concepts rather than modern frameworks.
+1. Base Tomcat image is pulled
+2. WAR file copied into `/usr/local/tomcat/webapps`
+3. Tomcat auto-deploys application
+4. Server starts on port 8080
 
 ---
 
-## 📌 Key Learning Outcomes
+## 11. Runtime Flow
 
-* Enterprise project structure
-* Separation of business and web layers
-* Build automation with Maven
-* Packaging and deploying WAR files
-* Integrating quality tools
+1. User accesses registration page
+2. Form submitted to servlet
+3. Servlet calls service layer
+4. Business logic processes request
+5. Response rendered via JSP
 
 ---
+
+## 12. Configuration Management
+
+### Encoding
+
+```
+UTF-8
+```
+
+Ensures consistent character handling across builds and reports.
+
+### Environment Independence
+
+* No OS-specific paths
+* Containerized runtime
+* Portable Maven configuration
+
+---
+
+## 13. CI/CD Integration (Conceptual)
+
+This project can be integrated with:
+
+* Jenkins
+* GitHub Actions
+* GitLab CI
+
+### Typical Pipeline
+
+1. Checkout code
+2. Run Maven build
+3. Execute tests
+4. Generate reports
+5. Build Docker image
+6. Deploy container
+
+---
+
+## 14. Security Considerations (Educational Scope)
+
+Since this is a learning project:
+
+* Authentication is basic
+* No encryption by default
+* No production-grade hardening
+
+Possible improvements:
+
+* Password hashing (BCrypt)
+* CSRF protection
+* Input validation framework
+
+---
+
+## 15. Limitations
+
+* Uses legacy Java EE APIs
+* No REST API layer
+* Minimal persistence layer
+* Not cloud-native
+* No horizontal scaling
+
+---
+
+## 16. Possible Enhancements
+
+### Technical
+
+* Upgrade to Java 17+
+* Replace JSP with REST + frontend
+* Add database (PostgreSQL/MySQL)
+* Implement Spring Boot
+* Add integration tests
+
+### DevOps
+
+* Add Kubernetes manifests
+* Add health checks
+* Add monitoring (Prometheus/Grafana)
+
+---
+
+## 17. Learning Outcomes (Expanded)
+
+By studying this project, you will understand:
+
+* Maven dependency resolution
+* WAR vs JAR packaging
+* Servlet lifecycle
+* Container deployment mechanics
+* Build reproducibility
+* Static analysis integration
+* Docker fundamentals
+
+---
+
+## 18. Who Should Use This Project
+
+* Students learning Java EE basics
+* Developers exploring Maven multi-module setups
+* DevOps beginners learning containerization
+* Trainers demonstrating enterprise patterns
+
+---
+
+## 19. Summary
+
+**register-app-java** is a compact but complete example of a traditional enterprise Java workflow — from code to container.
+
+It emphasizes **fundamentals over frameworks**, making it ideal for building a strong conceptual foundation before moving to modern stacks.
